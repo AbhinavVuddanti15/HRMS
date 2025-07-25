@@ -1,5 +1,5 @@
 import React from "react";
-import { FieldError, useForm } from "react-hook-form";
+import { useForm, SubmitHandler, FieldError } from "react-hook-form";
 import { FiEdit } from "react-icons/fi";
 import {
   Box,
@@ -14,99 +14,93 @@ import {
 } from "@chakra-ui/react";
 import { useAbout } from "../hook";
 
+// Step 1: Type definition
+type AboutHobby = {
+  aboutHobby: string;
+};
 
 const AboutHobby = () => {
   const { isOpen, onToggle } = useDisclosure();
   const { handleAboutHobby } = useAbout();
+
+  // Step 2: Typed useForm
   const {
-    handleSubmit,
     register,
+    handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<AboutHobby>();
+
+  // Step 3: Typed submit function
+  const onSubmit: SubmitHandler<AboutHobby> = (data) => {
+    handleAboutHobby(data);
+  };
+
   return (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "full" }}>
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          width: "full",
+          justifyContent: "start",
+          alignItems: "center",
+          gap: "1rem",
         }}
       >
-        <Box
-          as="div"
-          sx={{
-            display: "flex",
-            justifyContent: "start",
-            alignItems: "center",
-            gap: "1rem",
-          }}
-        >
-          <Text fontWeight="semibold">What About Your hobby ?</Text>
-          <FiEdit
-            onClick={onToggle}
-            onMouseOver={(e) => (e.currentTarget.style.cursor = "pointer")}
-          />
-        </Box>
+        <Text fontWeight="semibold">What About Your Hobby?</Text>
+        <FiEdit
+          onClick={onToggle}
+          onMouseOver={(e) => (e.currentTarget.style.cursor = "pointer")}
+        />
+      </Box>
 
-        {!isOpen && (
-          <Text noOfLines={[1, 2, 3]}>
-            The quick brown fox jumps over the lazy dog" is an The quick brown
-            fox jumps over the lazy dog" is an The quick brown fox jumps over
-          </Text>
-        )}
-        <Collapse in={isOpen} animateOpacity>
-          <form onSubmit={handleSubmit(handleAboutHobby)}>
+      {!isOpen && (
+        <Text noOfLines={[1, 2, 3]}>
+          Example hobby text placeholder...
+        </Text>
+      )}
+
+      <Collapse in={isOpen} animateOpacity>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <FormControl isInvalid={!!errors.aboutHobby}>
+              <Input
+                as={Textarea}
+                id="aboutHobby"
+                size="md"
+                placeholder="Describe your hobby"
+                {...register("aboutHobby", {
+                  required: "Hobby is required",
+                  minLength: {
+                    value: 20,
+                    message: "Minimum 20 characters",
+                  },
+                })}
+              />
+              <FormErrorMessage>
+                {errors.aboutHobby && (
+                  <span>{(errors.aboutHobby as FieldError).message}</span>
+                )}
+              </FormErrorMessage>
+            </FormControl>
+
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
+                justifyContent: "end",
+                alignItems: "end",
                 gap: "1rem",
               }}
             >
-              <FormControl isInvalid={!!errors.aboutHobby}>
-                <Input
-                  as={Textarea}
-                  type="Textarea"
-                  id="aboutHobby"
-                  size="md"
-                  placeholder=""
-                  {...register("aboutHobby", {
-                    required: "Hobby description required",
-                    minLength: {
-                      value: 20,
-                      message:
-                        "Hobby description must be at least 20 characters long",
-                    },
-                  })}
-                />
-                <FormErrorMessage>
-                  {errors.aboutHobby &&
-                    typeof errors.aboutHobby === "object" && (
-                      <span>{(errors.aboutHobby as FieldError).message}</span>
-                    )}
-                </FormErrorMessage>
-              </FormControl>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "end",
-                  gap: "1rem",
-                }}
-              >
-                <Button fontSize="18px" colorScheme="blue" type="submit">
-                  save
-                </Button>
-                <Button fontSize="18px" onClick={onToggle}>
-                  cancel
-                </Button>
-              </Box>
+              <Button fontSize="18px" colorScheme="blue" type="submit">
+                Save
+              </Button>
+              <Button fontSize="18px" onClick={onToggle}>
+                Cancel
+              </Button>
             </Box>
-          </form>
-        </Collapse>
-      </Box>
-    </>
+          </Box>
+        </form>
+      </Collapse>
+    </Box>
   );
 };
 
